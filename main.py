@@ -310,8 +310,8 @@ class Server():
         self._msg_q.put(f"PRIVMSG {source_channel} :CMD {cmd} exited with returncode {proc.returncode}\r\n".encode())
 
 if __name__ == "__main__":
-    serv = Server("RCE", "rce-is-fun-jcj", "##jcj2")
-    serv.connect("tantalum.libera.chat", 6667, sock_recvbuf = 8192)
+    serv = Server("<username>", "<nick>", "<channel>")     #
+    serv.connect("<server IP>", 6667, sock_recvbuf = 8192) # NOTE TO USER: You have to set these values
 
     # Allow for the user to send raw IRC messages
     # These bypass the send queue
