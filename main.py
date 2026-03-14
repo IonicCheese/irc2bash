@@ -63,7 +63,9 @@ class Server():
     def die(self, msg = "Python3 Server() outta here!"):
         print("[SERVER/MAINTHREAD] Sending PART and QUIT")
         # Part all of our channels with a cool message, then quit
-        self._msg_q.put(f"PART {self.channel} : {msg}\r\n".encode())
+        for channel in self.channels:
+            self._msg_q.put(f"PART {channel} : {msg}\r\n".encode())
+
         self._msg_q.put(f"QUIT : {msg}\r\n".encode())
 
         print("[SERVER/MAINTHREAD] Signaling threads to quit!")
@@ -79,6 +81,8 @@ class Server():
             print(f"[SENDTHREAD] Sleeping for {self._msg_time} seconds on message count {self._msg_count}")
             time.sleep(self._msg_time)
             if self._msg_count == 10:
+                print("[SENDTHREAD] Sending ping on 10th message!")
+                self.sock.send(f"PING :{ip}\r\n".encode())
                 self._msg_count = 0
 
             # Grab message and send it
@@ -86,8 +90,7 @@ class Server():
                 msg = self._msg_q.get(timeout = 60)
             except queue.Empty:
                 # So the thread signaler works
-                print("[SENDTHREAD] Timeout occurred waiting on queue... sending ping!")
-                self.sock.send(f"PING :{ip}\r\n".encode())
+                continue
 
             print(f"[SENDTHREAD] Sending message: {msg}")
             try:
@@ -121,10 +124,7 @@ class Server():
                 print("[RECVTHREAD] Message: {data}")
                 continue
             except socket.timeout:
-                # Instead of using another thread, I just use a socket timeout to send pings
-                # Kills two birds with one stone as we can't wait forever due to threading Events
-                print("[RECVTHREAD] Timeout occurred waiting on server messages... sending ping!")
-                self.sock.send(f"PING :{ip}\r\n".encode())
+                # So threading Events work
                 continue
 
             # Handle IRC messages
@@ -288,7 +288,7 @@ class Server():
 
         # Calculate maximum message size            
         # 512 bytes is max IRC message with <IRCv3 and no cap neg
-        msg_without_data = b"PRIVMSG " + self.channel.encode() + b" :" + b"\r\n"
+        msg_without_data = b"PRIVMSG " + target_channel.encode() + b" :" + b"\r\n"
         max_data_len = 512 - len(msg_without_data)
         print(f"[CMDTHREAD] Reading from Popen pipe with len = {max_data_len}!")
 
