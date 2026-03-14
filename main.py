@@ -356,3 +356,6 @@ if __name__ == "__main__":
             print("[MAINTHREAD] Could take up to 60 seconds for socket timeout!")
             serv.die()
             raise SystemExit(0)
+        except EOFError:
+            while True:
+                serv._going_down.wait()
