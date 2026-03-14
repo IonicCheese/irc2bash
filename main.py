@@ -120,7 +120,7 @@ class Server():
                 # Can't use die because we have no connection... just quit I suppose
                 self._going_down.set()
                 raise SystemExit(1)
-                
+
         print("[SENDTHREAD] Quitting due to thread condition!")
 
     # This is the function used to process messages from the server
@@ -338,9 +338,9 @@ class Server():
 
             self.privmsg(target_channel, line)
 
-        # Wait is required to fetch exit code
-        proc.wait()
-        self.privmsg(target_channel, f"CMD {cmd} exited with returncode {proc.returncode}")
+            # Break if our child exits for any reason
+            if proc.poll():
+                break
 
 if __name__ == "__main__":
     serv = Server(**config.user, **config.bot)
