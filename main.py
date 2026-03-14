@@ -119,7 +119,8 @@ class Server():
             except BrokenPipeError:
                 # Can't use die because we have no connection... just quit I suppose
                 self._going_down.set()
-
+                raise SystemExit(1)
+                
         print("[SENDTHREAD] Quitting due to thread condition!")
 
     # This is the function used to process messages from the server
